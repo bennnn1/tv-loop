@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Monitor Slideshow</title>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: #000;
+        }
+
+        .slideshow-container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+        }
+
+        .slide {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            /* Forces the browser to sharpen text edges when stretching the image */
+            image-rendering: -webkit-optimize-contrast;
+            image-rendering: crisp-edges;
+            image-rendering: pixelated;
+            object-fit: fill; 
+            opacity: 0;
+            transition: opacity 1s ease-in-out; /* Smooth crossfade */
+        }
+
+        .slide.active {
+            opacity: 1;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="slideshow-container">
+        <img src="Slide1.JPG" class="slide active">
+        <img src="Slide2.JPG" class="slide">
+        <img src="Slide3.JPG" class="slide">
+    </div>
+
+    <script>
+        const slides = document.querySelectorAll('.slide');
+        let currentSlide = 0;
+
+        // Your exact requested timing loop (in milliseconds)
+        const slideTimes = [
+            42000, // Slide 1: 42 seconds
+            7000,  // Slide 2: 7 seconds
+            15000  // Slide 3: 15 seconds
+        ];
+
+        function nextSlide() {
+            slides[currentSlide].classList.remove('active');
+            currentSlide = (currentSlide + 1) % slides.length;
+            slides[currentSlide].classList.add('active');
+
+            setTimeout(nextSlide, slideTimes[currentSlide]);
+        }
+
+        // Start the countdown loop
+        setTimeout(nextSlide, slideTimes[0]);
+    </script>
+
+</body>
+</html>
