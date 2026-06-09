@@ -20,17 +20,34 @@
             height: 100%;
         }
 
-        .slide {
+        /* Slide wrapper to hold images and overlays together */
+        .slide-wrapper {
             position: absolute;
             width: 100%;
             height: 100%;
-            object-fit: fill; 
             opacity: 0;
             transition: opacity 0.8s ease-in-out; /* Smooth crossfade */
         }
 
-        .slide.active {
+        .slide-wrapper.active {
             opacity: 1;
+        }
+
+        .slide-img {
+            width: 100%;
+            height: 100%;
+            object-fit: fill; 
+        }
+
+        /* Floating Animated GIF Positioned Perfectly on Slide 3 */
+        .animated-overlay {
+            position: absolute;
+            /* Adjust these percentages if the graphic needs to move slightly */
+            top: 18.5%;  
+            left: 5.8%;  
+            width: 10.6%; 
+            height: auto;
+            box-shadow: 0 0 10px rgba(0,0,0,0.5); /* Soft shadow matches PowerPoint style */
         }
 
         /* The Countdown Bar Container */
@@ -39,8 +56,8 @@
             top: 0;
             left: 0;
             width: 100%;
-            height: 8px; /* Thickness of the countdown bar */
-            background-color: rgba(255, 255, 255, 0.2); /* Faint background track */
+            height: 8px;
+            background-color: rgba(255, 255, 255, 0.2);
             z-index: 10;
         }
 
@@ -48,9 +65,9 @@
         .timer-bar {
             height: 100%;
             width: 100%;
-            background-color: #00bcd4; /* Bright cyan color (Change hex code to match branding) */
+            background-color: #00bcd4; /* Bright cyan color */
             transform-origin: left center;
-            transform: scaleX(1); /* Starts at full width */
+            transform: scaleX(1);
         }
     </style>
 </head>
@@ -61,13 +78,24 @@
     </div>
 
     <div class="slideshow-container">
-        <img src="Slide1.JPG" class="slide active">
-        <img src="Slide2.JPG" class="slide">
-        <img src="Slide3.JPG" class="slide">
+        
+        <div class="slide-wrapper active">
+            <img src="Slide1.JPG" class="slide-img">
+        </div>
+        
+        <div class="slide-wrapper">
+            <img src="Slide2.JPG" class="slide-img">
+        </div>
+        
+        <div class="slide-wrapper">
+            <img src="Slide3.jpg" class="slide-img">
+            <img src="army.gif" class="animated-overlay">
+        </div>
+
     </div>
 
     <script>
-        const slides = document.querySelectorAll('.slide');
+        const wrappers = document.querySelectorAll('.slide-wrapper');
         const timerBar = document.getElementById('timerBar');
         let currentSlide = 0;
         let timerTimeout;
@@ -80,37 +108,26 @@
         ];
 
         function startSlideCycle() {
-            // 1. Reset the progress bar animation completely
             timerBar.style.transition = 'none';
             timerBar.style.transform = 'scaleX(1)';
             
-            // Force browser to recognize the reset
             void timerBar.offsetWidth; 
 
-            // 2. Tell the bar to shrink smoothly to 0 over the exact slide duration
             const currentDuration = slideTimes[currentSlide];
             timerBar.style.transition = `transform ${currentDuration}ms linear`;
             timerBar.style.transform = 'scaleX(0)';
 
-            // 3. Set a timeout to switch to the next slide when the bar hits 0
             timerTimeout = setTimeout(nextSlide, currentDuration);
         }
 
         function nextSlide() {
-            // Hide current slide
-            slides[currentSlide].classList.remove('active');
-            
-            // Move to next slide index
-            currentSlide = (currentSlide + 1) % slides.length;
-            
-            // Show next slide
-            slides[currentSlide].classList.add('active');
+            wrappers[currentSlide].classList.remove('active');
+            currentSlide = (currentSlide + 1) % wrappers.length;
+            wrappers[currentSlide].classList.add('active');
 
-            // Restart the countdown bar for the new slide
             startSlideCycle();
         }
 
-        // Kick off the loop immediately on page load
         startSlideCycle();
     </script>
 
