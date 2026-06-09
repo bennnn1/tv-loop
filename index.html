@@ -42,12 +42,11 @@
         /* Floating Animated GIF Positioned Perfectly on Slide 3 */
         .animated-overlay {
             position: absolute;
-            /* Adjust these percentages if the graphic needs to move slightly */
             top: 18.5%;  
             left: 5.8%;  
             width: 10.6%; 
             height: auto;
-            box-shadow: 0 0 10px rgba(0,0,0,0.5); /* Soft shadow matches PowerPoint style */
+            box-shadow: 0 0 10px rgba(0,0,0,0.5);
         }
 
         /* The Countdown Bar Container */
@@ -72,6 +71,10 @@
     </style>
 </head>
 <body>
+
+    <div class="timer-container">
+        <div id="timerBar" class="timer-bar"></div>
+    </div>
 
     <div class="slideshow-container">
         
@@ -104,28 +107,32 @@
         ];
 
         function startSlideCycle() {
+            // Reset the progress bar animation completely
             timerBar.style.transition = 'none';
             timerBar.style.transform = 'scaleX(1)';
             
+            // Force browser to recognize the reset
             void timerBar.offsetWidth; 
 
+            // Tell the bar to shrink smoothly to 0 over the exact slide duration
             const currentDuration = slideTimes[currentSlide];
             timerBar.style.transition = `transform ${currentDuration}ms linear`;
             timerBar.style.transform = 'scaleX(0)';
 
+            // Set a timeout to switch to the next slide when the bar hits 0
             timerTimeout = setTimeout(nextSlide, currentDuration);
         }
 
         function nextSlide() {
+            // Hide current slide
             wrappers[currentSlide].classList.remove('active');
+            
+            // Move to next slide index
             currentSlide = (currentSlide + 1) % wrappers.length;
+            
+            // Show next slide
             wrappers[currentSlide].classList.add('active');
 
+            // Restart the countdown bar for the new slide
             startSlideCycle();
         }
-
-        startSlideCycle();
-    </script>
-
-</body>
-</html>
