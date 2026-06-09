@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Monitor Slideshow</title>
+    <style>
+        /* Remove borders and hide scrollbars */
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: #000; /* Black background matches the monitor frame */
+        }
+
+        .slideshow-container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+        }
+
+        /* Stack all images directly on top of each other */
+        .slide {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            object-fit: contain; /* Keeps your original document layout proportions perfect */
+            opacity: 0;
+            transition: opacity 1s ease-in-out; /* Smooth 1-second crossfade between slides */
+        }
+
+        /* Make the current active slide visible */
+        .slide.active {
+            opacity: 1;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="slideshow-container">
+        <img src="slide1.jpg" class="slide active">
+        
+        <img src="slide2.gif" class="slide">
+        
+        <img src="slide3.jpg" class="slide">
+    </div>
+
+    <script>
+        const slides = document.querySelectorAll('.slide');
+        let currentSlide = 0;
+
+        // Custom display times for each slide (measured in milliseconds)
+        const slideTimes = [
+            42000, // Slide 1 stays on screen for 42 seconds
+            7000,  // Slide 2 stays on screen for 7 seconds
+            15000  // Slide 3 stays on screen for 15 seconds
+        ];
+
+        function nextSlide() {
+            // Hide the slide currently showing
+            slides[currentSlide].classList.remove('active');
+            
+            // Move to the next slide index (0, 1, 2, then loop back to 0)
+            currentSlide = (currentSlide + 1) % slides.length;
+            
+            // Fade in the next slide
+            slides[currentSlide].classList.add('active');
+
+            // Set a timer for how long this new slide should stay up
+            setTimeout(nextSlide, slideTimes[currentSlide]);
+        }
+
+        // Start the very first timer countdown (42 seconds for Slide 1)
+        setTimeout(nextSlide, slideTimes[0]);
+    </script>
+
+</body>
+</html>
