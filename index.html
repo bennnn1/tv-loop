@@ -3,71 +3,167 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Monitor Slideshow</title>
+    <title>Automated Dining Display</title>
     <style>
         body, html {
-            margin: 0;
-            padding: 0;
-            width: 100%;
-            height: 100%;
-            overflow: hidden;
-            background-color: #000;
+            margin: 0; padding: 0; width: 100%; height: 100%;
+            overflow: hidden; background-color: #fdf6e2;
+            font-family: 'Segoe UI', Arial, sans-serif;
         }
-
-        .slideshow-container {
-            position: relative;
-            width: 100%;
-            height: 100%;
-        }
-
+        .slideshow-container { position: relative; width: 100%; height: 100%; }
         .slide {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            /* Forces the browser to sharpen text edges when stretching the image */
-            image-rendering: -webkit-optimize-contrast;
-            image-rendering: crisp-edges;
-            image-rendering: pixelated;
-            object-fit: fill; 
-            opacity: 0;
-            transition: opacity 1s ease-in-out; /* Smooth crossfade */
+            position: absolute; width: 100%; height: 100%;
+            opacity: 0; transition: opacity 1s ease-in-out;
+            display: flex; flex-direction: column;
+            justify-content: center; align-items: center;
+            box-sizing: border-box; padding: 30px;
         }
+        .slide.active { opacity: 1; }
+        
+        .welcome-title { font-size: 5rem; color: #8B4513; font-weight: bold; margin-bottom: 20px; }
+        
+        /* Flawless, sharp vector table design */
+        .menu-table {
+            width: 98%; height: 80%; border-collapse: collapse;
+            background: #ffffff; box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        .menu-table th, .menu-table td {
+            border: 2px solid #cd7a32; padding: 10px;
+            text-align: center; font-size: 1.05rem; color: #333; white-space: pre-line;
+            vertical-align: top;
+        }
+        .menu-table th { background-color: #cd7a32; color: white; font-size: 1.2rem; }
+        .category-row { background-color: #e69138; color: white; font-weight: bold; width: 8%; }
 
-        .slide.active {
-            opacity: 1;
-        }
+        .gif-container { margin-top: 20px; border: 3px solid #cd7a32; box-shadow: 0 4px 10px rgba(0,0,0,0.15); }
+        .gif-container img { width: 300px; height: 300px; display: block; }
     </style>
 </head>
 <body>
 
     <div class="slideshow-container">
-        <img src="Slide1.JPG" class="slide active">
-        <img src="Slide2.JPG" class="slide">
-        <img src="Slide3.JPG" class="slide">
+        
+        <div class="slide active">
+            <div class="welcome-title">Welcome to Dining Services</div>
+            <p style="font-size: 2.5rem; color: #555;">Today's Menu Schedule Will Display Shortly</p>
+        </div>
+        
+        <div class="slide">
+            <div class="welcome-title">Happy Birthday Army!</div>
+            <div class="gif-container">
+                <img src="army.gif" alt="Army Birthday">
+            </div>
+        </div>
+        
+        <div class="slide">
+            <h2 id="menu-date-heading" style="color: #cd7a32; margin: 0 0 10px 0; font-size: 2.3rem;">Weekly Dining Menu</h2>
+            <table class="menu-table">
+                <thead>
+                    <tr>
+                        <th>Meal</th>
+                        <th>Sunday</th>
+                        <th>Monday</th>
+                        <th>Tuesday</th>
+                        <th>Wednesday</th>
+                        <th>Thursday</th>
+                        <th>Friday</th>
+                        <th>Saturday</th>
+                    </tr>
+                </thead>
+                <tbody id="menu-rows">
+                    </tbody>
+            </table>
+        </div>
+
     </div>
 
     <script>
+        // Mapping Excel columns to their corresponding days/meals based on your spreadsheet fields
+        function buildMenuTable(csvText) {
+            const lines = csvText.split('\n').map(line => line.split(','));
+            const today = new Date();
+            let activeRow = null;
+
+            // Match the current calendar date to the correct row range in your Excel sheet
+            for (let i = 1; i < lines.length; i++) {
+                if (!lines[i][1]) continue; 
+                const rowDate = new Date(lines[i][1].replace(/^"|"$/g, ''));
+                const endOfWeek = new Date(rowDate);
+                endOfWeek.setDate(endOfWeek.getDate() + 6);
+
+                if (today >= rowDate && today <= endOfWeek) {
+                    activeRow = lines[i];
+                    document.getElementById('menu-date-heading').innerText = `Weekly Menu: ${lines[i][1]} – ${endOfWeek.toLocaleDateString()}`;
+                    break;
+                }
+            }
+
+            // Fallback to the latest row if no direct calendar match is found
+            if (!activeRow) activeRow = lines[lines.length - 1];
+
+            const tbody = document.getElementById('menu-rows');
+            
+            // Helper function to bundle items into clean vertical line breaks
+            const cleanData = (startIndex, count) => {
+                return activeRow.slice(startIndex, startIndex + count)
+                    .map(item => item.replace(/^"|"$/g, '').trim())
+                    .filter(item => item !== "" && item !== "0")
+                    .join('<br>');
+            };
+
+            // Programmatically reconstruct the grid to perfectly mirror your template layout
+            const meals = [
+                { name: "Breakfast", start: 2, steps: [1, 3, 4, 3, 3, 2, 2] },
+                { name: "Featured Lunch", start: 20, steps: [4, 2, 2, 3, 2, 2, 2] },
+                { name: "Daily Specials", start: 39, steps: [4, 4, 4, 4, 4, 4, 4] },
+                { name: "Featured Dinner", start: 67, steps: [3, 4, 4, 4, 4, 4, 4] }
+            ];
+
+            let currentPointer = 2; // Tracking index across the raw CSV line array
+            
+            meals.forEach(meal => {
+                let tr = document.createElement('tr');
+                let headerTd = document.createElement('td');
+                headerTd.className = 'category-row';
+                headerTd.innerHTML = meal.name;
+                tr.appendChild(headerTd);
+
+                meal.steps.forEach(stepSize => {
+                    let td = document.createElement('td');
+                    td.innerHTML = cleanData(currentPointer, stepSize);
+                    tr.appendChild(td);
+                    currentPointer += stepSize;
+                });
+
+                tbody.appendChild(tr);
+            });
+        }
+
+        // Fetch the file from your GitHub server repository
+        async function initMenu() {
+            try {
+                const res = await fetch('menu.csv');
+                const text = await res.text();
+                buildMenuTable(text);
+            } catch (err) {
+                console.error("Database connection failed:", err);
+            }
+        }
+
+        // Slideshow Loop Controller (42s -> 7s -> 15s)
         const slides = document.querySelectorAll('.slide');
         let currentSlide = 0;
-
-        // Your exact requested timing loop (in milliseconds)
-        const slideTimes = [
-            42000, // Slide 1: 42 seconds
-            7000,  // Slide 2: 7 seconds
-            15000  // Slide 3: 15 seconds
-        ];
+        const slideTimes = [42000, 7000, 15000];
 
         function nextSlide() {
             slides[currentSlide].classList.remove('active');
             currentSlide = (currentSlide + 1) % slides.length;
             slides[currentSlide].classList.add('active');
-
             setTimeout(nextSlide, slideTimes[currentSlide]);
         }
 
-        // Start the countdown loop
+        initMenu();
         setTimeout(nextSlide, slideTimes[0]);
     </script>
-
 </body>
 </html>
