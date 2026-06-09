@@ -1,12 +1,118 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Monitor Slideshow with Countdown</title>
     <style>
-        body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background: #000; }
-        img { width: 100%; height: 100%; object-fit: fill; }
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: #000;
+        }
+
+        .slideshow-container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+        }
+
+        .slide {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            object-fit: fill; 
+            opacity: 0;
+            transition: opacity 0.8s ease-in-out; /* Smooth crossfade */
+        }
+
+        .slide.active {
+            opacity: 1;
+        }
+
+        /* The Countdown Bar Container */
+        .timer-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 8px; /* Thickness of the countdown bar */
+            background-color: rgba(255, 255, 255, 0.2); /* Faint background track */
+            z-index: 10;
+        }
+
+        /* The Moving Bar itself */
+        .timer-bar {
+            height: 100%;
+            width: 100%;
+            background-color: #00bcd4; /* Bright cyan color (Change hex code to match branding) */
+            transform-origin: left center;
+            transform: scaleX(1); /* Starts at full width */
+        }
     </style>
 </head>
 <body>
-    <img src="PC Menu.gif">
+
+    <div class="timer-container">
+        <div id="timerBar" class="timer-bar"></div>
+    </div>
+
+    <div class="slideshow-container">
+        <img src="Slide1.JPG" class="slide active">
+        <img src="Slide2.JPG" class="slide">
+        <img src="Slide3.JPG" class="slide">
+    </div>
+
+    <script>
+        const slides = document.querySelectorAll('.slide');
+        const timerBar = document.getElementById('timerBar');
+        let currentSlide = 0;
+        let timerTimeout;
+
+        // Custom display times for each slide (in milliseconds)
+        const slideTimes = [
+            42000, // Slide 1: 42 seconds
+            7000,  // Slide 2: 7 seconds
+            15000  // Slide 3: 15 seconds
+        ];
+
+        function startSlideCycle() {
+            // 1. Reset the progress bar animation completely
+            timerBar.style.transition = 'none';
+            timerBar.style.transform = 'scaleX(1)';
+            
+            // Force browser to recognize the reset
+            void timerBar.offsetWidth; 
+
+            // 2. Tell the bar to shrink smoothly to 0 over the exact slide duration
+            const currentDuration = slideTimes[currentSlide];
+            timerBar.style.transition = `transform ${currentDuration}ms linear`;
+            timerBar.style.transform = 'scaleX(0)';
+
+            // 3. Set a timeout to switch to the next slide when the bar hits 0
+            timerTimeout = setTimeout(nextSlide, currentDuration);
+        }
+
+        function nextSlide() {
+            // Hide current slide
+            slides[currentSlide].classList.remove('active');
+            
+            // Move to next slide index
+            currentSlide = (currentSlide + 1) % slides.length;
+            
+            // Show next slide
+            slides[currentSlide].classList.add('active');
+
+            // Restart the countdown bar for the new slide
+            startSlideCycle();
+        }
+
+        // Kick off the loop immediately on page load
+        startSlideCycle();
+    </script>
+
 </body>
 </html>
