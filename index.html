@@ -38,20 +38,28 @@
       return Math.ceil((((d - yearStart) / 86400000) + 1)/7);
     }
 
-    // Anchor point: We know ISO Week 44 of 2026 (Nov 1-7) is Week 3 of your rotation
     const anchorWeek = 44;
     const anchorWeekIndex = 3; 
 
     const currentWeekNum = getISOWeek(new Date());
-    
-    // Calculate the difference from our anchor week and find the correct 4-week index (1 to 4)
     let weekDiff = currentWeekNum - anchorWeek;
     let currentMenuIndex = ((anchorWeekIndex - 1 + weekDiff) % 4 + 4) % 4 + 1;
     let nextMenuIndex = (currentMenuIndex % 4) + 1;
 
-    // Dynamically assign filenames (`Week1.png`, `Week2.png`, `Week3.png`, `Week4.png`)
-    document.getElementById("slide1").src = `Week${currentMenuIndex}.png`;
-    document.getElementById("slide2").src = `Week${nextMenuIndex}.png`;
+    // Set filenames using lowercase .png to match your files
+    const currentImg = `Week${currentMenuIndex}.png`;
+    const nextImg = `Week${nextMenuIndex}.png`;
+
+    document.getElementById("slide1").src = currentImg;
+    document.getElementById("slide2").src = nextImg;
+
+    // Safety fallback: if an image fails to load (like Week 1 or 2 not uploaded yet), 
+    // hide it so it doesn't show a broken image icon
+    document.querySelectorAll("img").forEach(img => {
+      img.onerror = function() {
+        this.style.display = "none";
+      };
+    });
 
     // Playlist rotation timers (Current: 45s, Next: 15s, Note: 15s)
     const playlist = [
