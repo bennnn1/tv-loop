@@ -11,7 +11,6 @@
       background-color: #000000;
       overflow: hidden;
       display: flex; justify-content: center; align-items: center;
-      color: white; font-family: sans-serif; text-align: center;
     }
     img {
       max-width: 100%; max-height: 100%;
@@ -22,11 +21,6 @@
       image-rendering: crisp-edges;
     }
     img.active { display: block; }
-    .error-box {
-      padding: 20px;
-      border: 2px solid red;
-      background: #220000;
-    }
   </style>
   <meta http-equiv="refresh" content="7200">
 </head>
@@ -36,47 +30,25 @@
   <img id="slide2" alt="Next Week Menu">
   <img id="slide3" src="Note.png" alt="Dining Note">
 
-  <!-- Hidden debug container -->
-  <div id="debug" style="display:none;" class="error-box">
-    <h2>Missing Image File:</h2>
-    <p id="missingFilename" style="font-size: 24px; margin-top: 10px; color: #ff8888;"></p>
-    <p style="font-size: 14px; margin-top: 15px; color: #ccc;">Check your GitHub repository file list to make sure this exact filename is uploaded.</p>
-  </div>
-
   <script>
-    function getISOWeek(d) {
-      d = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
-      d.setUTCDate(d.UTCDate + 4 - (d.getDay()||7));
-      var yearStart = new Date(Date.UTC(d.getUTCFullYear(),0,1));
-      return Math.ceil((((d - yearStart) / 86400000) + 1)/7);
-    }
+    // Anchor Date: November 1, 2026 is known to be Week 3
+    const anchorDate = new Date(2026, 10, 1).getTime(); // Month 10 is November
+    const anchorWeekIndex = 3;
 
-    const anchorWeek = 44;
-    const anchorWeekIndex = 3; 
+    // Calculate how many weeks have passed since the anchor date
+    const now = new Date().getTime();
+    const diffTime = now - anchorDate;
+    const diffWeeks = Math.floor(diffTime / (1000 * 60 * 60 * 24 * 7));
 
-    const currentWeekNum = getISOWeek(new Date());
-    let weekDiff = currentWeekNum - anchorWeek;
-    let currentMenuIndex = ((anchorWeekIndex - 1 + weekDiff) % 4 + 4) % 4 + 1;
+    // Determine current and next menu indexes (1 through 4)
+    let currentMenuIndex = ((anchorWeekIndex - 1 + diffWeeks) % 4 + 4) % 4 + 1;
     let nextMenuIndex = (currentMenuIndex % 4) + 1;
 
-    const currentImg = `Week${currentMenuIndex}.png`;
-    const nextImg = `Week${nextMenuIndex}.png`;
+    // Assign filenames (using lowercase .png)
+    document.getElementById("slide1").src = `Week${currentMenuIndex}.png`;
+    document.getElementById("slide2").src = `Week${nextMenuIndex}.png`;
 
-    document.getElementById("slide1").src = currentImg;
-    document.getElementById("slide2").src = nextImg;
-
-    // If an image fails to load, display the exact filename on screen
-    document.querySelectorAll("img").forEach(img => {
-      img.onerror = function() {
-        this.style.display = "none";
-        // If slide 1 fails, show the debug box with the missing name
-        if(this.id === "slide1") {
-          document.getElementById("debug").style.display = "block";
-          document.getElementById("missingFilename").innerText = this.src.split('/').pop();
-        }
-      };
-    });
-
+    // Playlist rotation timers (Current: 45s, Next: 15s, Note: 15s)
     const playlist = [
       { id: "slide1", duration: 45000 },
       { id: "slide2", duration: 15000 },
@@ -85,16 +57,9 @@
 
     let currentIndex = 0;
     function showNextSlide() {
-      // Hide debug if visible during rotation
-      document.getElementById("debug").style.display = "none";
-      
       document.getElementById(playlist[currentIndex].id).classList.remove("active");
       currentIndex = (currentIndex + 1) % playlist.length;
-      
-      const nextEl = document.getElementById(playlist[currentIndex].id);
-      if (nextEl.style.display !== "none") {
-        nextEl.classList.add("active");
-      }
+      document.getElementById(playlist[currentIndex].id).classList.add("active");
       setTimeout(showNextSlide, playlist[currentIndex].duration);
     }
 
